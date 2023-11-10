@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+# Jenkins Controller
+  jenkins:
+  # Build DockerFile in build/jenkins repository
+    build: build/jenkins
+    privileged: true
+    user: root
+    # http://localhost:8001 for UI
+    ports:
+      - 8001:8080
+      # Port 50000 only needed if we want to launch external Jenkins agents
+      # - 50000:50000
+    # Fix container name to have predictive name
+    container_name: jenkins
+    # Enabled Docker TLS & path to Engine running on "docker" container
+    environment:
+      - DOCKER_TLS_VERIFY=1
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_HOST=tcp://docker:2376
+    # Persistence & shared certs
+    volumes:
+      - ./data/jenkins_home:/var/jenkins_home
+      - ./data/certs:/certs/client:ro
+
+# Docker Engine used by Jenkins Controller
+  docker:
+  # Use Docker In Docker Image
+    image: docker:24.0.7-dind-alpine3.18
+    privileged: true
+    # Expose Docker Engine port for controlling Docker Engine from host, useful for debugging
+    # ports:
+    #   - 9999:2376
+    # Fix container name to have predictive name
+    container_name: docker
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    # Persistence, shared jenkins_home for wrokspace acces
+    volumes:
+      - ./data/jenkins_home:/var/jenkins_home
+      - ./data/certs:/certs/client
+      - ./data/docker/etc/docker:/etc/docker

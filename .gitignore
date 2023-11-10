@@ -1,0 +1,11 @@
+## COMMON
+tmp/
+
+## TERRAFORM
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate*
+.terraform.tfstate*
+
+## Jenkins data dir
+data/
